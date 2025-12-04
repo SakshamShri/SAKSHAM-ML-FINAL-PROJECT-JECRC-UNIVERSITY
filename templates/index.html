@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Health Care Center</title>
+
+    <!-- Bootstrap + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Modern font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      :root{
+        --bg:#f6f8fb;
+        --muted:#6b7280;
+      }
+      html { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+      body { background: var(--bg); -webkit-font-smoothing:antialiased; }
+
+      .header-gradient {
+        background: linear-gradient(90deg, rgba(38,58,163,0.95) 0%, rgba(18,126,214,0.95) 100%);
+        padding: 1rem 0;
+      }
+      .logo-modern { width:52px; height:52px; border-radius:10px; object-fit:cover; border:2px solid rgba(255,255,255,0.12); }
+
+      .card.glass {
+        background: rgba(255,255,255,0.94);
+        border-radius: 12px;
+        box-shadow: 0 6px 24px rgba(18,24,40,0.06);
+        border: 1px solid rgba(15,23,42,0.04);
+      }
+
+      .suggestions {
+        position: absolute;
+        z-index: 3000;
+        left: 0;
+        right: 0;
+        margin-top: .5rem;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 8px 30px rgba(13,38,76,0.06);
+        border: 1px solid rgba(15,23,42,0.04);
+        max-height: 260px;
+        overflow: auto;
+      }
+      .suggestion-item { padding: .65rem .85rem; display:flex; justify-content:space-between; align-items:center; cursor:pointer; border-radius:8px; }
+      .suggestion-item.active, .suggestion-item:hover { background: linear-gradient(90deg, rgba(37,99,235,0.06), rgba(96,165,250,0.02)); }
+      mark { background: rgba(99,102,241,0.15); color: #1e293b; padding: 0 .15rem; border-radius: 3px; }
+
+      .btn-ghost { background: transparent; border: 0; color: rgba(15,23,42,0.8); }
+      .btn-soft-amber{ background: linear-gradient(90deg,#f7b733,#fc4a1a); color:#fff; border-radius:8px; border:0; }
+      .btn-soft-blue{ background: linear-gradient(90deg,#6a11cb,#2575fc); color:#fff; border-radius:8px; border:0; }
+      .btn-soft-magenta{ background: linear-gradient(90deg,#f83600,#f9d423); color:#000; border-radius:8px; border:0; }
+      .btn-soft-red{ background: linear-gradient(90deg,#ff416c,#ff4b2b); color:#fff; border-radius:8px; border:0; }
+      .btn-soft-green{ background: linear-gradient(90deg,#00b09b,#96c93d); color:#fff; border-radius:8px; border:0; }
+      .btn-soft-yellow{ background: linear-gradient(90deg,#f6d365,#fda085); color:#000; border-radius:8px; border:0; }
+
+      .badge-selected { margin: .25rem .25rem 0 0; }
+      .modal-header.bg-dark { background:#0b1220; color: #fff; }
+      .small-muted { color: var(--muted); font-size: .9rem; }
+      @media (max-width:768px){ .logo-modern{width:44px;height:44px;} }
+    </style>
+  </head>
+  <body>
+
+    <header class="header-gradient">
+      <div class="container d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <img src="{{ url_for('static', filename='img.png') }}" alt="logo" class="logo-modern me-3">
+          <div>
+            <h1 class="h5 mb-0 fw-semibold text-light">Health Care Center</h1>
+            <small class="text-light-50">Quick symptom checker · AI-powered</small>
+          </div>
+        </div>
+        <div class="d-none d-md-block">
+          <a class="text-light-25 small me-3" href="/">Home</a>
+          <a class="text-light-25 small me-3" href="/about">About</a>
+          <a class="text-light-25 small" href="/contact">Contact</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container my-5">
+      <div class="row gx-4 gy-4">
+        <div class="col-lg-7">
+          <div class="card glass p-4">
+            <div class="d-flex align-items-start justify-content-between mb-3">
+              <div>
+                <h2 class="h4 mb-1">What are your symptoms?</h2>
+                <p class="text-muted mb-0 small-muted">Start typing to see suggestions. Press Enter to add, or use the mic.</p>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-info text-dark">Model ready</span>
+                <div class="small text-muted mt-1">Backend: <span id="backend-url">{{ request.host_url[:-1] }}</span></div>
+              </div>
+            </div>
+
+            <form id="main-form" class="mb-3" onsubmit="return false;">
+              <label class="form-label small text-muted">Symptoms</label>
+              <div class="position-relative">
+                <input id="symptoms-input" name="symptoms" class="form-control form-control-lg" placeholder="Type symptoms (e.g. itching, cough, red sore ...)" autocomplete="off">
+                <div id="suggestions" class="suggestions d-none" role="listbox" aria-label="Suggestions"></div>
+
+                <div class="input-actions position-absolute end-0 top-50 translate-middle-y d-flex gap-2 pe-2">
+                  <button id="mic-btn" class="btn btn-ghost" title="Start voice input" type="button"><i class="bi bi-mic-fill"></i></button>
+                  <button id="clear-selection" class="btn btn-ghost" title="Clear input" type="button"><i class="bi bi-x-circle"></i></button>
+                </div>
+              </div>
+
+              <div class="mt-3">
+                <div id="selected-list" class="d-flex flex-wrap"></div>
+              </div>
+
+              <div class="mt-4 d-flex gap-2">
+                <button id="predict-btn" class="btn btn-primary btn-lg flex-grow-1">Predict</button>
+                <button id="example-btn" class="btn btn-outline-primary btn-lg" type="button">Example</button>
+              </div>
+            </form>
+
+            <div id="error-box" class="alert alert-danger d-none my-3"></div>
+            <div id="help-text" class="text-muted small">Tip: Use commas or press Enter to add a symptom. Use arrow keys to navigate suggestions.</div>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="card p-3">
+            <h3 class="h6 mb-2">Preview</h3>
+            <div id="preview-area" class="mb-3">
+              <div class="p-3 rounded-3 bg-light">
+                <p class="mb-0 text-muted small">No prediction yet — add symptoms and click Predict.</p>
+              </div>
+            </div>
+
+            <div id="result-actions" class="d-none">
+              <div class="d-grid gap-2">
+                <button class="btn btn-soft-amber" data-bs-toggle="modal" data-bs-target="#diseaseModal">Disease</button>
+                <button class="btn btn-soft-blue" data-bs-toggle="modal" data-bs-target="#descriptionModal">Description</button>
+                <button class="btn btn-soft-magenta" data-bs-toggle="modal" data-bs-target="#precautionModal">Precautions</button>
+                <button class="btn btn-soft-red" data-bs-toggle="modal" data-bs-target="#medicationsModal">Medications</button>
+                <button class="btn btn-soft-green" data-bs-toggle="modal" data-bs-target="#workoutsModal">Workouts</button>
+                <button class="btn btn-soft-yellow" data-bs-toggle="modal" data-bs-target="#dietsModal">Diets</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 text-muted small">
+            <div><i class="bi bi-info-circle"></i> Results and precautions come from the dataset.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modals -->
+    <div class="modal fade" id="diseaseModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header bg-dark"><h5 class="modal-title">Predicted Disease</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body"><p id="modal-disease" class="mb-0 lead"></p></div>
+      </div></div>
+    </div>
+
+    <div class="modal fade" id="descriptionModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header bg-dark"><h5 class="modal-title">Description</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body"><p id="modal-description" class="mb-0"></p></div>
+      </div></div>
+    </div>
+
+    <div class="modal fade" id="precautionModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header bg-dark"><h5 class="modal-title">Precautions</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body"><ul id="modal-precautions" class="mb-0"></ul></div>
+      </div></div>
+    </div>
+
+    <div class="modal fade" id="medicationsModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header bg-dark"><h5 class="modal-title">Medications</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body"><ul id="modal-medications" class="mb-0"></ul></div>
+      </div></div>
+    </div>
+
+    <div class="modal fade" id="workoutsModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header bg-dark"><h5 class="modal-title">Extras</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body"><ul id="modal-workouts" class="mb-0"></ul></div>
+      </div></div>
+    </div>
+
+    <div class="modal fade" id="dietsModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header bg-dark"><h5 class="modal-title">Diets</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body"><ul id="modal-diets" class="mb-0"></ul></div>
+      </div></div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- UI script -->
+    <script>
+      // backend url from Flask (template) or fallback to current origin
+      const API_URL = (function(){ try { return '{{ request.host_url[:-1] }}'; } catch(e){ return window.location.origin; } })();
+      document.getElementById('backend-url').textContent = API_URL;
+
+      // elements
+      const input = document.getElementById('symptoms-input');
+      const suggestionsEl = document.getElementById('suggestions');
+      const selectedListEl = document.getElementById('selected-list');
+      const predictBtn = document.getElementById('predict-btn');
+      const exampleBtn = document.getElementById('example-btn');
+      const errorBox = document.getElementById('error-box');
+      const previewArea = document.getElementById('preview-area');
+      const resultActions = document.getElementById('result-actions');
+
+      // modal elements
+      const modalDisease = document.getElementById('modal-disease');
+      const modalDescription = document.getElementById('modal-description');
+      const modalPrecautions = document.getElementById('modal-precautions');
+      const modalMedications = document.getElementById('modal-medications');
+      const modalWorkouts = document.getElementById('modal-workouts');
+      const modalDiets = document.getElementById('modal-diets');
+
+      let symptoms = [], filtered = [], selected = [], activeIndex = -1;
+
+      function esc(s){ return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+      async function loadSymptoms(){
+        try{
+          const res = await fetch(API_URL + '/symptoms');
+          if(!res.ok) throw new Error('Failed to load');
+          const j = await res.json();
+          symptoms = Array.isArray(j) ? j : [];
+        }catch(e){
+          showError('Could not load symptom list from backend.');
+          console.error(e);
+        }
+      }
+
+      function showError(msg){ errorBox.textContent = msg; errorBox.classList.remove('d-none'); }
+      function hideError(){ errorBox.classList.add('d-none'); errorBox.textContent = ''; }
+
+      function renderSelected(){
+        selectedListEl.innerHTML = '';
+        if(selected.length === 0){
+          selectedListEl.innerHTML = '<small class="text-muted">No symptoms selected</small>';
+          return;
+        }
+        selected.forEach(s => {
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-sm btn-outline-secondary me-1 mb-1';
+          btn.innerHTML = esc(s) + ' <span class="text-danger ms-1">&times;</span>';
+          btn.onclick = ()=>{ selected = selected.filter(x => x !== s); renderSelected(); };
+          selectedListEl.appendChild(btn);
+        });
+      }
+
+      // normalize various backend responses into arrays
+      function toArray(v){
+        if(v === null || v === undefined) return [];
+        if(Array.isArray(v)) return v;
+        if(typeof v === 'string'){
+          // try parse JSON
+          try{
+            const p = JSON.parse(v);
+            if(Array.isArray(p)) return p;
+          }catch(e){}
+          // split on newlines or commas
+          if(v.indexOf('\n') !== -1) return v.split('\n').map(x=>x.trim()).filter(Boolean);
+          if(v.indexOf(',') !== -1) return v.split(',').map(x=>x.trim()).filter(Boolean);
+          return [v.trim()];
+        }
+        // object or number -> stringify
+        return [String(v)];
+      }
+
+      function setListInto(el, data, emptyMsg){
+        const arr = toArray(data);
+        // flatten nested arrays one level
+        const flat = arr.reduce((acc, cur) => acc.concat(Array.isArray(cur) ? cur : [cur]), []);
+        el.innerHTML = '';
+        if(flat.length === 0){
+          const li = document.createElement('li');
+          li.className = 'text-muted';
+          li.textContent = emptyMsg || 'No data available';
+          el.appendChild(li);
+          return;
+        }
+        flat.forEach(it => {
+          const li = document.createElement('li');
+          li.textContent = typeof it === 'object' ? JSON.stringify(it) : it;
+          el.appendChild(li);
+        });
+      }
+
+      function highlightMatch(item, q){
+        if(!q) return esc(item);
+        const i = item.toLowerCase().indexOf(q.toLowerCase());
+        if(i === -1) return esc(item);
+        return esc(item.slice(0,i)) + '<mark>' + esc(item.slice(i,i+q.length)) + '</mark>' + esc(item.slice(i+q.length));
+      }
+
+      function renderSuggestions(){
+        suggestionsEl.innerHTML = '';
+        if(!filtered.length){ suggestionsEl.classList.add('d-none'); return; }
+        filtered.slice(0,25).forEach((s, idx) => {
+          const div = document.createElement('div');
+          div.className = 'suggestion-item ' + (idx === activeIndex ? 'active' : '');
+          div.innerHTML = '<div>' + highlightMatch(s, input.value.trim()) + '</div>' + (selected.includes(s) ? '<small class="text-muted">selected</small>' : '');
+          div.onmousedown = (ev) => { ev.preventDefault(); pickSuggestion(s); };
+          div.onmouseenter = ()=>{ activeIndex = idx; renderSuggestions(); };
+          suggestionsEl.appendChild(div);
+        });
+        suggestionsEl.classList.remove('d-none');
+      }
+
+      function updateFilter(){
+        const q = input.value.trim().toLowerCase();
+        if(!q){ filtered = []; renderSuggestions(); return; }
+        filtered = symptoms.filter(s => s.toLowerCase().includes(q));
+        filtered.sort((a,b) => (selected.includes(a) === selected.includes(b) ? 0 : (selected.includes(a) ? 1 : -1)));
+        activeIndex = filtered.length ? 0 : -1;
+        renderSuggestions();
+      }
+
+      function pickSuggestion(s){
+        if(!selected.includes(s)) selected.push(s);
+        input.value = '';
+        filtered = [];
+        activeIndex = -1;
+        renderSelected();
+        renderSuggestions();
+        input.focus();
+      }
+
+      input.addEventListener('input', ()=>{ hideError(); updateFilter(); });
+      input.addEventListener('keydown', (e)=>{
+        if(!filtered.length) return;
+        if(e.key === 'ArrowDown'){ e.preventDefault(); activeIndex = Math.min(activeIndex+1, filtered.length-1); renderSuggestions(); }
+        else if(e.key === 'ArrowUp'){ e.preventDefault(); activeIndex = Math.max(activeIndex-1, 0); renderSuggestions(); }
+        else if(e.key === 'Enter'){ e.preventDefault(); if(activeIndex >= 0 && activeIndex < filtered.length) pickSuggestion(filtered[activeIndex]); }
+        else if(e.key === 'Escape'){ suggestionsEl.classList.add('d-none'); }
+      });
+
+      document.getElementById('clear-selection').addEventListener('click', ()=>{ input.value=''; selected=[]; filtered=[]; renderSelected(); renderSuggestions(); hideError(); });
+      document.getElementById('mic-btn').addEventListener('click', ()=>{
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if(!SpeechRecognition){ alert('SpeechRecognition not supported in this browser'); return; }
+        const rec = new SpeechRecognition(); rec.lang='en-US'; rec.interimResults=false; rec.maxAlternatives=1;
+        rec.onresult = (ev) => { const t = ev.results[0][0].transcript; input.value = input.value ? (input.value + ' ' + t) : t; updateFilter(); };
+        rec.onerror = (e) => { console.error('speech err', e); showError('Speech recognition error'); };
+        rec.start();
+      });
+
+      exampleBtn.addEventListener('click', ()=>{ selected = []; selected.push(...(symptoms.slice(0,4))); renderSelected(); });
+
+      predictBtn.addEventListener('click', async ()=>{
+        hideError();
+        if(!selected.length){ showError('Pick at least one symptom'); return; }
+        predictBtn.disabled=true; predictBtn.textContent='Predicting...';
+        try{
+          const r = await fetch(API_URL + '/predict', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ symptoms:selected }) });
+          const j = await r.json();
+          if(!r.ok) throw new Error((j && (j.error||j.detail)) || 'Prediction failed');
+
+          // Preview card
+          previewArea.innerHTML = `<div class="p-3 rounded-3 bg-light"><strong class="d-block mb-1">Prediction:</strong><div class="h5 mb-0">${esc(j.disease||'')}</div><small class="text-muted">${j.probability ? 'Confidence: '+Math.round(j.probability*100)+'%' : ''}</small></div>`;
+
+          // disease + description
+          modalDisease.textContent = j.disease || '';
+          modalDescription.textContent = j.description || '';
+
+          // precautions (flatten / normalize)
+          setListInto(modalPrecautions, j.precautions || j.raw_precautions || j.my_precautions || [], 'No precautions provided');
+
+          // medications, workouts, diets: normalized to lists
+          setListInto(modalMedications, j.medications || [], 'No medications provided');
+          setListInto(modalWorkouts, j.workouts || [], 'No workouts provided');
+          setListInto(modalDiets, j.diets || [], 'No diet suggestions provided');
+
+          resultActions.classList.remove('d-none');
+          resultActions.scrollIntoView({ behavior: 'smooth' });
+        }catch(err){
+          console.error(err);
+          showError(err.message || 'Prediction failed');
+        }finally{
+          predictBtn.disabled=false; predictBtn.textContent='Predict';
+        }
+      });
+
+      (async function init(){ renderSelected(); renderSuggestions(); await loadSymptoms(); })();
+    </script>
+  </body>
+</html>
