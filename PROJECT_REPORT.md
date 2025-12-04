@@ -5,7 +5,12 @@
 
 **Project Title:** Disease Prediction System Using Machine Learning  
 **Institution:** JECRC University  
-**Student Name:** Saksham Shrivastava  
+**Team Members:**
+- Saksham Shrivastava (22BCON333)
+- Gungun Choudhary (22BCON322)
+- Saurabh Soni (22BCON273)
+- Nikunj Varshaney (22BCOL1413)
+
 **GitHub Repository:** https://github.com/SakshamShri/SAKSHAM-ML-FINAL-PROJECT-JECRC-UNIVERSITY  
 **Date:** December 2025
 
@@ -1243,24 +1248,34 @@ Predicts disease based on symptoms.
 
 ### Appendix F: Acknowledgments
 
-I would like to express my gratitude to:
+We would like to express our gratitude to:
 
 - **JECRC University** for providing the platform and resources for this project
 - **Faculty Advisor** for guidance and support throughout the project
 - **Department of Computer Science** for technical infrastructure
 - **Open Source Community** for Flask, scikit-learn, and other libraries
 - **Kaggle** for medical datasets and inspiration
+- **Our Team Members** for their collaborative efforts and dedication:
+  - Saksham Shrivastava (22BCON333)
+  - Gungun Choudhary (22BCON322)
+  - Saurabh Soni (22BCON273)
+  - Nikunj Varshaney (22BCOL1413)
 - **Family and Friends** for encouragement and support
 
 ---
 
 ## DECLARATION
 
-I hereby declare that this project report titled **"Disease Prediction System Using Machine Learning"** submitted to JECRC University is a record of original work done by me under the guidance of my project supervisor. The information and data provided in this report is authentic to the best of my knowledge.
+We hereby declare that this project report titled **"Disease Prediction System Using Machine Learning"** submitted to JECRC University is a record of original work done by us under the guidance of our project supervisor. The information and data provided in this report is authentic to the best of our knowledge.
 
 This project has not been submitted to any other university or institution for the award of any degree or diploma.
 
-**Name:** Saksham Shrivastava  
+**Team Members:**
+- Saksham Shrivastava (22BCON333)
+- Gungun Choudhary (22BCON322)
+- Saurabh Soni (22BCON273)
+- Nikunj Varshaney (22BCOL1413)
+
 **Date:** December 4, 2025  
 **Place:** JECRC University
 

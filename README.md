@@ -2,6 +2,14 @@
 
 A machine learning-based web application that predicts diseases based on user-reported symptoms and provides comprehensive health recommendations including precautions, medications, diet plans, and workout suggestions.
 
+## Team Members
+- **Saksham Shrivastava** (22BCON333)
+- **Gungun Choudhary** (22BCON322)
+- **Saurabh Soni** (22BCON273)
+- **Nikunj Varshaney** (22BCOL1413)
+
+**Institution:** JECRC University
+
 ## Overview
 
 This project uses a Support Vector Machine (SVM) classifier trained on a dataset of 4,920 medical records with 132 symptoms to predict among 41 different diseases. The system achieves 100% accuracy on the test dataset and provides a user-friendly Flask web interface for symptom input and disease prediction.
@@ -275,3 +283,13 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 ## Contact
 
 For questions or support, please use the contact page in the web application.
+
+## Team
+
+This project was developed by:
+- **Saksham Shrivastava** (22BCON333)
+- **Gungun Choudhary** (22BCON322)
+- **Saurabh Soni** (22BCON273)
+- **Nikunj Varshaney** (22BCOL1413)
+
+**JECRC University - Final Year Project**
